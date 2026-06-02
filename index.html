@@ -1,1 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#01696f" />
+  <title>Task Reminder App</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@500,600,700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="./manifest.json" />
+  <style>
+    :root, [data-theme="light"] {
+      --font-display: 'General Sans', 'Inter', sans-serif;
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.4rem);
+      --text-xl: clamp(1.45rem, 1.2rem + 1vw, 2rem);
+      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --space-12: 3rem; --space-16: 4rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec;
+      --color-border:#d4d1ca; --color-divider:#dcd9d5; --color-text:#28251d; --color-text-muted:#66645f;
+      --color-text-faint:#9e9a92; --color-text-inverse:#f9f8f4; --color-primary:#01696f; --color-primary-hover:#0c4e54;
+      --color-primary-highlight:#cedcd8; --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b;
+      --radius-sm:.375rem; --radius-md:.6rem; --radius-lg:.95rem; --radius-xl:1.25rem; --radius-full:9999px;
+      --shadow-sm:0 1px 2px oklch(0.2 0.01 80 / 0.06); --shadow-md:0 6px 18px oklch(0.2 0.01 80 / 0.08);
+      --transition:180ms cubic-bezier(0.16,1,0.3,1);
+    }
+    [data-theme="dark"] {
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#23211f;
+      --color-border:#393836; --color-divider:#2c2a27; --color-text:#e2dfdb; --color-text-muted:#aaa59d;
+      --color-text-faint:#77736d; --color-text-inverse:#171614; --color-primary:#4f98a3; --color-primary-hover:#227f8b;
+      --color-primary-highlight:#283638; --color-success:#6daa45; --color-warning:#d28a58; --color-error:#d163a7;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 10px 26px rgba(0,0,0,.34);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-text-size-adjust:none;text-size-adjust:none;scroll-behavior:smooth}
+    body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);line-height:1.5;background:var(--color-bg);color:var(--color-text)}
+    button,input,select,textarea{font:inherit;color:inherit}
+    button{border:none;cursor:pointer}
+    input,select,textarea{background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 12%, transparent);border-radius:var(--radius-md);padding:.82rem .95rem;width:100%}
+    textarea{min-height:92px;resize:vertical}
+    :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
+    .app{max-width:1200px;margin:0 auto;padding:var(--space-4);display:grid;gap:var(--space-4)}
+    .skip-link{position:absolute;left:-9999px}.skip-link:focus{left:var(--space-4);top:var(--space-4);z-index:2000;background:var(--color-surface);padding:var(--space-3);border-radius:var(--radius-md)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4);background:var(--color-surface);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);position:sticky;top:var(--space-4);z-index:30}
+    .brand{display:flex;align-items:center;gap:.85rem}
+    .logo{width:42px;height:42px;color:var(--color-primary)}
+    .brand h1{font-family:var(--font-display);font-size:var(--text-lg)}
+    .brand p{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .top-actions{display:flex;gap:.75rem;align-items:center}
+    .icon-btn,.small-btn,.primary-btn,.secondary-btn,.ghost-btn,.status-btn{min-height:44px;border-radius:var(--radius-full);padding:.72rem 1rem;transition:all var(--transition)}
+    .icon-btn{width:44px;padding:0;background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);display:grid;place-items:center}
+    .small-btn,.secondary-btn,.ghost-btn{background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent)}
+    .primary-btn{background:var(--color-primary);color:var(--color-text-inverse)}
+    .primary-btn:hover{background:var(--color-primary-hover)}
+    .ghost-btn{background:transparent}
+    .layout{display:grid;gap:var(--space-4)}
+    .grid{display:grid;gap:var(--space-4)}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{background:var(--color-surface);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+    .panel{padding:var(--space-4)}
+    .hero{display:grid;gap:var(--space-4)}
+    .hero h2{font-family:var(--font-display);font-size:var(--text-xl);max-width:14ch}
+    .hero p{color:var(--color-text-muted);max-width:58ch}
+    .kpi{padding:var(--space-4);display:grid;gap:.3rem;background:linear-gradient(180deg, color-mix(in oklab,var(--color-primary) 5%, var(--color-surface)), var(--color-surface))}
+    .kpi strong{font-size:1.8rem;font-family:var(--font-display)}
+    .kpi span{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-4)}
+    .section-head h3{font-size:var(--text-lg);font-family:var(--font-display)}
+    .task-list,.history-list{display:grid;gap:var(--space-3)}
+    .task-item,.history-item{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 9%, transparent);display:grid;gap:var(--space-3)}
+    .task-top,.task-bottom,.row-inline{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3)}
+    .task-meta,.pill-row{display:flex;flex-wrap:wrap;gap:.5rem}
+    .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.36rem .7rem;border-radius:var(--radius-full);font-size:var(--text-xs);background:var(--color-surface-offset);color:var(--color-text-muted)}
+    .pill.status-done{background:color-mix(in oklab,var(--color-success) 18%, var(--color-surface));color:var(--color-success)}
+    .pill.status-pending{background:color-mix(in oklab,var(--color-warning) 15%, var(--color-surface));color:var(--color-warning)}
+    .pill.status-skipped{background:color-mix(in oklab,var(--color-error) 13%, var(--color-surface));color:var(--color-error)}
+    .task-title{font-weight:700}
+    .task-note,.muted{color:var(--color-text-muted);font-size:var(--text-sm)}
+    .status-row{display:flex;flex-wrap:wrap;gap:.6rem}
+    .status-btn{background:var(--color-surface);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);padding:.64rem .9rem;font-size:var(--text-sm)}
+    .status-btn[data-status="done"]{color:var(--color-success)}
+    .status-btn[data-status="pending"]{color:var(--color-warning)}
+    .status-btn[data-status="skipped"]{color:var(--color-error)}
+    .forms{display:grid;gap:var(--space-4)}
+    .form-grid{display:grid;grid-template-columns:1fr;gap:var(--space-3)}
+    label{display:grid;gap:.45rem;font-size:var(--text-sm);font-weight:600}
+    .tab-row{display:flex;gap:.75rem;flex-wrap:wrap}
+    .tab-btn{min-height:44px;padding:.7rem 1rem;border-radius:var(--radius-full);background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent)}
+    .tab-btn.active{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent}
+    .empty{padding:var(--space-8) var(--space-4);text-align:center;color:var(--color-text-muted)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;place-items:end center;padding:var(--space-4);z-index:100}
+    .modal-backdrop.show{display:grid}
+    .modal{width:min(100%,520px);background:var(--color-surface);border-radius:1.25rem 1.25rem .9rem .9rem;border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);box-shadow:var(--shadow-md);padding:var(--space-4);display:grid;gap:var(--space-4)}
+    .reminder-time{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .footer-note{font-size:var(--text-xs);color:var(--color-text-faint)}
+    .bottom-bar{position:sticky;bottom:var(--space-4);display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;padding:.75rem;background:color-mix(in oklab,var(--color-surface) 86%, transparent);backdrop-filter:blur(16px);border:1px solid color-mix(in oklab,var(--color-text) 10%, transparent);border-radius:var(--radius-xl)}
+    .bottom-bar button{min-height:48px;border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-text) 8%, transparent)}
+    .bottom-bar button.active{background:var(--color-primary);color:var(--color-text-inverse)}
+    .desktop-hide{display:block}
+    .summary-grid{display:grid;gap:var(--space-3);grid-template-columns:repeat(2,minmax(0,1fr))}
+    .summary-box{padding:var(--space-4);background:var(--color-surface-2);border-radius:var(--radius-lg);border:1px solid color-mix(in oklab,var(--color-text) 9%, transparent)}
+    .summary-box strong{display:block;font-family:var(--font-display);font-size:1.5rem}
+    .helper{font-size:var(--text-xs);color:var(--color-text-faint)}
+    .hidden{display:none !important}
+    @media (min-width: 900px){
+      .layout{grid-template-columns:1.15fr .85fr}
+      .hero{grid-template-columns:1.2fr .8fr;align-items:stretch}
+      .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .desktop-hide{display:none}
+    }
+    @media (max-width: 899px){
+      .desktop-section.hidden-mobile{display:none}
+    }
+    @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto;transition:none !important}}
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="app">
+    <header class="topbar card">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 48 48" aria-label="Task Reminder logo" fill="none">
+          <rect x="5" y="7" width="28" height="34" rx="10" stroke="currentColor" stroke-width="3"></rect>
+          <path d="M16 18h10M16 24h10M16 30h6" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+          <circle cx="35" cy="31" r="8" fill="currentColor" opacity=".16"></circle>
+          <path d="M35 27v4l3 2" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div>
+          <h1>Task Reminder</h1>
+          <p>Local-first daily update tracker</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="small-btn" id="loadSampleBtn">Load sample</button>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <span id="themeIcon">◐</span>
+        </button>
+      </div>
+    </header>
 
+    <main id="main" class="grid">
+      <section class="hero card panel">
+        <div class="grid">
+          <span class="pill">Standalone app</span>
+          <h2>Track reminders, update status fast, and review progress week by week.</h2>
+          <p>Store your tasks and history inside the app, trigger reminder prompts, and keep daily proof of completion for calls, workouts, and checklists.</p>
+          <div class="tab-row">
+            <button class="primary-btn" id="triggerReminderBtn">Trigger reminder</button>
+            <button class="secondary-btn" id="exportBtn">Export backup</button>
+            <button class="ghost-btn" id="resetBtn">Reset data</button>
+          </div>
+          <p class="footer-note">This build stores data in your browser storage. Scheduled notifications can be added next with installable PWA behavior.</p>
+        </div>
+        <div class="grid stats">
+          <article class="card kpi"><span>Active tasks</span><strong id="activeCount">0</strong></article>
+          <article class="card kpi"><span>Done today</span><strong id="doneToday">0</strong></article>
+          <article class="card kpi"><span>Pending today</span><strong id="pendingToday">0</strong></article>
+          <article class="card kpi"><span>Week completion</span><strong id="weekRate">0%</strong></article>
+        </div>
+      </section>
+
+      <div class="layout">
+        <section class="desktop-section" data-section="tasks">
+          <article class="card panel">
+            <div class="section-head">
+          <h3>History</h3>
+              <div class="tab-row">
+                <button class="tab-btn active" data-history-tab="day">Day wise</button>
+                <button class="tab-btn" data-history-tab="week">Week wise</button>
+              </div>
+            </div>
+            <div class="summary-grid" id="historySummary"></div>
+            <div class="history-list" id="historyList"></div>
+          </article>
+        </section>
+
+        <section class="desktop-section hidden-mobile" data-section="settings">
+          <article class="card panel forms">
+            <div class="section-head">
+              <h3>Reminder mode</h3>
+              <span class="helper">For next version</span>
+            </div>
+            <div class="summary-box">
+              <strong>Local app now</strong>
+              <p class="muted">Internal storage works immediately. Real phone notifications need installable PWA setup and permission handling.</p>
+            </div>
+            <div class="summary-box">
+              <strong>Planned upgrade</strong>
+              <p class="muted">Add notification permission, service worker, install prompt, and a backup sync option later.</p>
+            </div>
+            <button class="secondary-btn" id="notifyInfoBtn">How notifications work</button>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <nav class="bottom-bar desktop-hide" aria-label="Mobile sections">
+      <button class="active" data-mobile-view="tasks">Tasks</button>
+      <button data-mobile-view="add">Add</button>
+      <button data-mobile-view="history">History</button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="reminderModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="reminderTitle">
+      <div class="grid">
+        <span class="pill">Reminder prompt</span>
+        <h3 id="reminderTitle">Update task</h3>
+        <p class="reminder-time" id="reminderMeta"></p>
+      </div>
+      <label>Quick note
+        <textarea id="reminderNote" placeholder="Add an update note"></textarea>
+      </label>
+      <div class="status-row">
+        <button class="status-btn" data-reminder-action="done">Done</button>
+        <button class="status-btn" data-reminder-action="pending">Pending</button>
+        <button class="status-btn" data-reminder-action="skipped">Skipped</button>
+        <button class="status-btn" data-reminder-action="close">Close</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'taskReminderStandalone.v1';
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const nowTime = () => new Date().toTimeString().slice(0,5);
+    const uid = () => Math.random().toString(36).slice(2,10);
+    const sameDay = (a,b) => a.slice(0,10) === b.slice(0,10);
+    const getWeekStart = (dStr) => {
+      const d = new Date(dStr);
+      const day = (d.getDay()+6)%7;
+      d.setDate(d.getDate()-day);
+      return d.toISOString().slice(0,10);
+    };
+    const fmtDate = (dStr) => new Date(dStr).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+    const fmtDateTime = (dStr) => new Date(dStr).toLocaleString(undefined,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+
+    const els = {
+      taskList: document.getElementById('taskList'), historyList: document.getElementById('historyList'), historySummary: document.getElementById('historySummary'),
+      taskForm: document.getElementById('taskForm'), activeCount: document.getElementById('activeCount'), doneToday: document.getElementById('doneToday'),
+      pendingToday: document.getElementById('pendingToday'), weekRate: document.getElementById('weekRate'), taskCountHelper: document.getElementById('taskCountHelper'),
+      loadSampleBtn: document.getElementById('loadSampleBtn'), triggerReminderBtn: document.getElementById('triggerReminderBtn'), exportBtn: document.getElementById('exportBtn'),
+      resetBtn: document.getElementById('resetBtn'), reminderModal: document.getElementById('reminderModal'), reminderTitle: document.getElementById('reminderTitle'),
+      reminderMeta: document.getElementById('reminderMeta'), reminderNote: document.getElementById('reminderNote'), themeToggle: document.getElementById('themeToggle'),
+      themeIcon: document.getElementById('themeIcon'), notifyInfoBtn: document.getElementById('notifyInfoBtn')
+    };
+
+    const state = {
+      data: loadData(),
+      historyTab: 'day',
+      currentReminderTaskId: null,
+      theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    };
+
+    function loadData(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw) return JSON.parse(raw);
+      }catch(e){}
+      return {tasks:[], logs:[]};
+    }
+    function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
+
+    function seedSample(){
+      const sampleTasks = [
+        {id:uid(), title:'Pending client call update', category:'Calls', time:'10:30', repeat:'daily', priority:'High', customRepeat:'', note:'Update whether client was reached', createdAt:new Date().toISOString()},
+        {id:uid(), title:'Daily workout completion', category:'Fitness', time:'07:00', repeat:'daily', priority:'Medium', customRepeat:'', note:'Mark done after walk or exercise', createdAt:new Date().toISOString()},
+        {id:uid(), title:'Checklist review', category:'Checklist', time:'21:00', repeat:'weekdays', priority:'Medium', customRepeat:'', note:'Mark pending if any item is incomplete', createdAt:new Date().toISOString()}
+      ];
+      const sampleLogs = [
+        {id:uid(), taskId:sampleTasks[1].id, status:'done', note:'6,200 steps completed', createdAt:new Date(Date.now()-86400000).toISOString()},
+        {id:uid(), taskId:sampleTasks[0].id, status:'pending', note:'Will call tomorrow morning', createdAt:new Date().toISOString()},
+        {id:uid(), taskId:sampleTasks[2].id, status:'done', note:'Reviewed all items', createdAt:new Date().toISOString()}
+      ];
+      state.data = {tasks:sampleTasks, logs:sampleLogs};
+      saveData(); render();
+    }
+
+    function addTaskFromForm(e){
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const task = Object.fromEntries(fd.entries());
+      state.data.tasks.unshift({id:uid(), ...task, createdAt:new Date().toISOString()});
+      saveData();
+      e.target.reset();
+      render();
+      switchMobile('tasks');
+    }
+
+    function taskLogs(taskId){ return state.data.logs.filter(log => log.taskId === taskId); }
+    function latestLog(taskId){ return taskLogs(taskId).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))[0]; }
+    function todayLog(taskId){ return taskLogs(taskId).find(log => sameDay(log.createdAt, new Date().toISOString())); }
+
+    function addLog(taskId,status,note=''){
+      state.data.logs.unshift({id:uid(), taskId, status, note, createdAt:new Date().toISOString()});
+      saveData();
+      render();
+    }
+
+    function removeTask(taskId){
+      state.data.tasks = state.data.tasks.filter(t => t.id !== taskId);
+      state.data.logs = state.data.logs.filter(l => l.taskId !== taskId);
+      saveData(); render();
+    }
+
+    function computeStats(){
+      const logsToday = state.data.logs.filter(log => sameDay(log.createdAt, new Date().toISOString()));
+      const weekStart = getWeekStart(new Date().toISOString());
+      const weekLogs = state.data.logs.filter(log => log.createdAt.slice(0,10) >= weekStart);
+      const doneCount = weekLogs.filter(l => l.status === 'done').length;
+      const rate = weekLogs.length ? Math.round((doneCount / weekLogs.length) * 100) : 0;
+      return {
+        activeTasks: state.data.tasks.length,
+        doneToday: logsToday.filter(l => l.status==='done').length,
+        pendingToday: logsToday.filter(l => l.status==='pending').length,
+        weekRate: rate
+      };
+    }
+
+    function renderStats(){
+      const s = computeStats();
+      els.activeCount.textContent = s.activeTasks;
+      els.doneToday.textContent = s.doneToday;
+      els.pendingToday.textContent = s.pendingToday;
+      els.weekRate.textContent = s.weekRate + '%';
+      els.taskCountHelper.textContent = `${s.activeTasks} task${s.activeTasks===1?'':'s'}`;
+    }
+
+    function taskCard(task){
+      const latest = latestLog(task.id);
+      const today = todayLog(task.id);
+      const statusClass = today ? `status-${today.status}` : '';
+      return `
+        <article class="task-item">
+          <div class="task-top">
+            <div class="grid">
+              <div class="task-title">${escapeHtml(task.title)}</div>
+              <div class="task-meta">
+                <span class="pill">${escapeHtml(task.category)}</span>
+                <span class="pill">${escapeHtml(task.time)}</span>
+                <span class="pill">${escapeHtml(task.repeat === 'custom' ? (task.customRepeat || 'Custom') : task.repeat)}</span>
+                <span class="pill">${escapeHtml(task.priority)}</span>
+                ${today ? `<span class="pill ${statusClass}">${capitalize(today.status)} today</span>` : `<span class="pill">No update today</span>`}
+              </div>
+            </div>
+            <button class="ghost-btn" data-delete-task="${task.id}" aria-label="Delete ${escapeHtml(task.title)}">Delete</button>
+          </div>
+          <p class="task-note">${escapeHtml(task.note || 'No note added.')}</p>
+          <div class="task-bottom">
+            <div class="muted">${latest ? `Last update: ${fmtDateTime(latest.createdAt)} · ${capitalize(latest.status)}` : 'No updates yet'}</div>
+            <div class="status-row">
+              <button class="status-btn" data-task-action="done" data-task-id="${task.id}">Done</button>
+              <button class="status-btn" data-task-action="pending" data-task-id="${task.id}">Pending</button>
+              <button class="status-btn" data-task-action="skipped" data-task-id="${task.id}">Skipped</button>
+              <button class="status-btn" data-open-reminder="${task.id}">Open</button>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function renderTasks(){
+      els.taskList.innerHTML = state.data.tasks.length ? state.data.tasks.map(taskCard).join('') : `<div class="empty">No tasks yet. Add your first reminder task.</div>`;
+    }
+
+    function renderHistory(){
+      const logs = [...state.data.logs].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+      if(state.historyTab === 'day'){
+        const grouped = logs.reduce((acc, log) => {
+          const key = log.createdAt.slice(0,10);
+          (acc[key] ||= []).push(log);
+          return acc;
+        }, {});
+        const days = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+        els.historySummary.innerHTML = `<div class="summary-box"><strong>${days.length}</strong><span>Active days logged</span></div><div class="summary-box"><strong>${logs.length}</strong><span>Total updates</span></div>`;
+        els.historyList.innerHTML = days.length ? days.map(day => {
+          const items = grouped[day].map(log => {
+            const task = state.data.tasks.find(t => t.id === log.taskId);
+            return `<article class="history-item"><div class="row-inline"><strong>${escapeHtml(task ? task.title : 'Deleted task')}</strong><span class="pill status-${log.status}">${capitalize(log.status)}</span></div><div class="muted">${fmtDateTime(log.createdAt)}</div>${log.note ? `<p class="task-note">${escapeHtml(log.note)}</p>` : ''}</article>`;
+          }).join('');
+          return `<section class="task-item"><div class="section-head"><h3>${fmtDate(day)}</h3><span class="helper">${grouped[day].length} update${grouped[day].length===1?'':'s'}</span></div>${items}</section>`;
+        }).join('') : `<div class="empty">No history yet. Update a task to start your log.</div>`;
+      } else {
+        const grouped = logs.reduce((acc, log) => {
+          const key = getWeekStart(log.createdAt);
+          (acc[key] ||= []).push(log);
+          return acc;
+        }, {});
+        const weeks = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+        const totalDone = logs.filter(l=>l.status==='done').length;
+        els.historySummary.innerHTML = `<div class="summary-box"><strong>${weeks.length}</strong><span>Weeks tracked</span></div><div class="summary-box"><strong>${totalDone}</strong><span>Completed updates</span></div>`;
+        els.historyList.innerHTML = weeks.length ? weeks.map(week => {
+          const weekLogs = grouped[week];
+          const done = weekLogs.filter(l=>l.status==='done').length;
+          const pending = weekLogs.filter(l=>l.status==='pending').length;
+          const skipped = weekLogs.filter(l=>l.status==='skipped').length;
+          const rate = Math.round((done / weekLogs.length) * 100);
+          return `<article class="task-item"><div class="section-head"><h3>Week of ${fmtDate(week)}</h3><span class="pill">${rate}% complete</span></div><div class="summary-grid"><div class="summary-box"><strong>${done}</strong><span>Done</span></div><div class="summary-box"><strong>${pending}</strong><span>Pending</span></div><div class="summary-box"><strong>${skipped}</strong><span>Skipped</span></div><div class="summary-box"><strong>${weekLogs.length}</strong><span>Total updates</span></div></div></article>`;
+        }).join('') : `<div class="empty">No weekly history yet.</div>`;
+      }
+    }
+
+    function openReminder(taskId){
+      const task = state.data.tasks.find(t => t.id === taskId) || state.data.tasks[0];
+      if(!task) return;
+      state.currentReminderTaskId = task.id;
+      els.reminderTitle.textContent = task.title;
+      els.reminderMeta.textContent = `${task.category} · Scheduled at ${task.time} · ${task.repeat === 'custom' ? (task.customRepeat || 'Custom repeat') : capitalize(task.repeat)}`;
+      els.reminderNote.value = '';
+      els.reminderModal.classList.add('show');
+      els.reminderModal.setAttribute('aria-hidden','false');
+    }
+
+    function closeReminder(){
+      els.reminderModal.classList.remove('show');
+      els.reminderModal.setAttribute('aria-hidden','true');
+      state.currentReminderTaskId = null;
+    }
+
+    function handleReminderAction(action){
+      if(action === 'close') return closeReminder();
+      if(!state.currentReminderTaskId) return;
+      addLog(state.currentReminderTaskId, action, els.reminderNote.value.trim());
+      closeReminder();
+    }
+
+    function exportBackup(){
+      const blob = new Blob([JSON.stringify(state.data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `task-reminder-backup-${todayISO()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function resetData(){
+      if(!confirm('Clear all tasks and history?')) return;
+      state.data = {tasks:[], logs:[]};
+      saveData(); render();
+    }
+
+    function switchTheme(){
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      els.themeIcon.textContent = state.theme === 'dark' ? '☾' : '◐';
+    }
+
+    function initTheme(){
+      document.documentElement.setAttribute('data-theme', state.theme);
+      els.themeIcon.textContent = state.theme === 'dark' ? '☾' : '◐';
+    }
+
+    function switchMobile(view){
+      document.querySelectorAll('[data-mobile-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.mobileView === view));
+      document.querySelectorAll('.desktop-section').forEach(section => {
+        if(window.innerWidth >= 900){ section.classList.remove('hidden'); return; }
+        section.classList.toggle('hidden-mobile', section.dataset.section !== view);
+      });
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+    }
+    function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function maybeTriggerDueReminder(){
+      const match = state.data.tasks.find(task => task.time === nowTime() && !todayLog(task.id));
+      if(match) openReminder(match.id);
+    }
+
+    function render(){
+      renderStats();
+      renderTasks();
+      renderHistory();
+      switchMobile(document.querySelector('[data-mobile-view].active')?.dataset.mobileView || 'tasks');
+    }
+
+    els.taskForm.addEventListener('submit', addTaskFromForm);
+    els.loadSampleBtn.addEventListener('click', seedSample);
+    els.triggerReminderBtn.addEventListener('click', () => openReminder(state.data.tasks[0]?.id));
+    els.exportBtn.addEventListener('click', exportBackup);
+    els.resetBtn.addEventListener('click', resetData);
+    els.themeToggle.addEventListener('click', switchTheme);
+    els.notifyInfoBtn.addEventListener('click', () => alert('Next step: convert this into an installable PWA and request notification permission for real alerts.'));
+
+    document.addEventListener('click', (e) => {
+      const taskAction = e.target.dataset.taskAction;
+      const taskId = e.target.dataset.taskId;
+      const openId = e.target.dataset.openReminder;
+      const deleteId = e.target.dataset.deleteTask;
+      const historyTab = e.target.dataset.historyTab;
+      const mobileView = e.target.dataset.mobileView;
+      const reminderAction = e.target.dataset.reminderAction;
+      if(taskAction && taskId) addLog(taskId, taskAction);
+      if(openId) openReminder(openId);
+      if(deleteId) removeTask(deleteId);
+      if(historyTab){ state.historyTab = historyTab; document.querySelectorAll('[data-history-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.historyTab === historyTab)); renderHistory(); }
+      if(mobileView) switchMobile(mobileView);
+      if(reminderAction) handleReminderAction(reminderAction);
+      if(e.target === els.reminderModal) closeReminder();
+    });
+
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeReminder(); });
+    window.addEventListener('resize', () => switchMobile(document.querySelector('[data-mobile-view].active')?.dataset.mobileView || 'tasks'));
+
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      });
+    }
+
+    initTheme();
+    render();
+    setInterval(maybeTriggerDueReminder, 60000);
+  </script>
+</body>
+</html>       
