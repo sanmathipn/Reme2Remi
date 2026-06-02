@@ -1,0 +1,23 @@
+{
+  "name": "Task Reminder App",
+  "short_name": "Reminder",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f6f2",
+  "theme_color": "#01696f",
+  "description": "Local-first task reminder and progress tracker for daily updates like calls, workouts, and checklists.",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%2301696f'/%3E%3Crect x='18' y='16' width='42' height='52' rx='12' fill='none' stroke='white' stroke-width='6'/%3E%3Cpath d='M33 34h16M33 46h16M33 58h10' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='67' cy='59' r='13' fill='white' fill-opacity='.2'/%3E%3Cpath d='M67 51v8l5 4' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "dir": "ltr",
+  "prefer_related_applications": false
+}
